@@ -16,6 +16,7 @@
   const formMessage = $('#form-message');
   const searchInput = $('#search');
   const toast = $('#toast');
+  const restoreInput = $('#restore-input');
   const numberFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
   const dateFormat = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -32,9 +33,9 @@
     }
   }
 
-  function saveItems() {
+  function saveItems(nextItems = items) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextItems));
       return true;
     } catch {
       return false;
@@ -50,7 +51,9 @@
 
   function formatDate(dateKey) {
     const [year, month, day] = dateKey.split('-').map(Number);
-    return dateFormat.format(new Date(year, month - 1, day, 12));
+    const date = new Date(year, month - 1, day, 12);
+    date.setFullYear(year);
+    return dateFormat.format(date);
   }
 
   function statusLabel(item, todayKey) {
@@ -167,8 +170,50 @@
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
     showToast('Daftar bahan berhasil diekspor.');
+  }
+
+  function exportBackup() {
+    const backup = L.createBackup(items);
+    const blob = new Blob([backup], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `pakai-dulu-cadangan-${L.localDateKey()}.json`;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    showToast('Cadangan JSON berhasil diunduh.');
+  }
+
+  async function restoreBackup(file) {
+    if (!file) return;
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new TypeError('Ukuran file cadangan melebihi batas 5 MB.');
+      const restoredItems = L.parseBackup(await file.text());
+      const confirmed = window.confirm(`Pulihkan ${restoredItems.length} bahan dari file ini? Seluruh daftar saat ini (${items.length} bahan) akan diganti.`);
+      if (!confirmed) return;
+      if (!saveItems(restoredItems)) {
+        showToast('Penyimpanan gagal; daftar saat ini tidak diubah. Pastikan ruang penyimpanan browser tersedia.');
+        return;
+      }
+      items = restoredItems;
+      activeFilter = 'active';
+      searchInput.value = '';
+      document.querySelectorAll('.filter-button').forEach((button) => {
+        const active = button.dataset.filter === activeFilter;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      render();
+      showToast(`${items.length} bahan berhasil dipulihkan.`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'File cadangan tidak dapat dipulihkan.');
+    } finally {
+      restoreInput.value = '';
+    }
   }
 
   form.addEventListener('submit', (event) => {
@@ -185,6 +230,10 @@
     if (!Number.isFinite(quantity) || quantity <= 0) {
       formMessage.textContent = 'Masukkan jumlah yang lebih besar dari nol.';
       quantityInput.focus();
+      return;
+    }
+    if (!L.CATEGORIES.includes(categoryInput.value) || !L.UNITS.includes(unitInput.value)) {
+      formMessage.textContent = 'Pilih kategori dan satuan yang tersedia.';
       return;
     }
     if (!L.isValidDateKey(expiry)) {
@@ -241,6 +290,9 @@
 
   searchInput.addEventListener('input', render);
   $('#export-button').addEventListener('click', exportCsv);
+  $('#backup-button').addEventListener('click', exportBackup);
+  $('#restore-button').addEventListener('click', () => restoreInput.click());
+  restoreInput.addEventListener('change', () => restoreBackup(restoreInput.files && restoreInput.files[0]));
   setCategories();
   expiryInput.value = L.localDateKey();
   render();

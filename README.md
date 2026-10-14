@@ -8,7 +8,7 @@ PakaiDulu adalah pencatat persediaan bahan dapur yang membantu pengguna memprior
 - Prioritaskan bahan yang tanggalnya lewat atau jatuh dalam tiga hari ke depan; urutan daftar menempatkan tanggal terdekat terlebih dahulu.
 - Cari bahan dan saring antara daftar aktif, bahan prioritas, dan bahan yang sudah dipakai.
 - Tandai bahan yang sudah digunakan, atau kembalikan ke daftar aktif.
-- Ekspor seluruh daftar ke CSV untuk dicadangkan atau dibuka di spreadsheet.
+- Ekspor CSV untuk dibuka di spreadsheet, serta cadangkan dan pulihkan seluruh daftar melalui file JSON.
 - Tampilan responsif, label formulir, status yang diumumkan ke pembaca layar, dan dukungan preferensi gerakan rendah.
 
 ## Mulai menggunakan
@@ -29,11 +29,11 @@ Membutuhkan Node.js 18 atau lebih baru; tidak perlu memasang paket:
 npm test
 ```
 
-Tes memakai test runner bawaan Node.js dan mencakup tanggal, validasi, filter, pengurutan, serta netralisasi formula CSV.
+Tes memakai test runner bawaan Node.js dan mencakup tanggal, validasi, filter, pengurutan, netralisasi formula CSV, serta validasi format cadangan.
 
 ## Privasi dan batasan
 
-PakaiDulu menyimpan daftar hanya di `localStorage` browser pada perangkat yang sedang digunakan. Data tidak dikirim ke server dan tidak dibagikan dengan pihak ketiga. Menghapus data situs/browser dapat menghapus daftar; ekspor CSV berkala bila ingin memiliki salinan. Jangan mencatat informasi sensitif yang tidak diperlukan.
+PakaiDulu menyimpan daftar hanya di `localStorage` browser pada perangkat yang sedang digunakan. Data tidak dikirim ke server dan tidak dibagikan dengan pihak ketiga. Menghapus data situs/browser dapat menghapus daftar; unduh **Cadangkan JSON** secara berkala agar daftar dapat dipulihkan. CSV hanya untuk spreadsheet dan tidak dapat diimpor kembali. Pemulihan JSON mengganti daftar lokal saat ini setelah konfirmasi. Jangan mencatat informasi sensitif yang tidak diperlukan.
 
 Tanggal yang ditampilkan merupakan pengingat, bukan penilaian keamanan atau kelayakan konsumsi makanan. Ikuti petunjuk penyimpanan pada kemasan dan periksa kondisi bahan sebelum digunakan. Perkiraan tanggal, jika dipakai, dapat keliru.
 

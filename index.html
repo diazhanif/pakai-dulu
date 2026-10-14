@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#f5f6f1">
   <meta name="description" content="PakaiDulu membantu mencatat bahan dapur dan mengingatkan mana yang perlu dipakai lebih dulu. Data tersimpan di perangkatmu.">
   <title>PakaiDulu — pakai yang lebih dulu</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="styles.css">
   <script src="logic.js" defer></script>
   <script src="app.js" defer></script>
@@ -92,7 +93,12 @@
         <section class="panel inventory-panel" aria-labelledby="inventory-title">
           <div class="inventory-heading">
             <div><p class="eyebrow">ISI DAPURMU</p><h2 id="inventory-title">Daftar bahan</h2></div>
-            <button id="export-button" class="secondary-button" type="button" title="Unduh semua bahan sebagai file CSV">Ekspor CSV <span aria-hidden="true">↓</span></button>
+            <div class="inventory-actions">
+              <button id="export-button" class="secondary-button" type="button" title="Unduh semua bahan sebagai file CSV">Ekspor CSV <span aria-hidden="true">↓</span></button>
+              <button id="backup-button" class="secondary-button" type="button" title="Unduh cadangan lengkap yang bisa dipulihkan">Cadangkan JSON <span aria-hidden="true">↓</span></button>
+              <button id="restore-button" class="secondary-button" type="button" title="Pulihkan daftar dari cadangan JSON">Pulihkan <span aria-hidden="true">↑</span></button>
+              <input id="restore-input" type="file" accept=".json,application/json" hidden aria-label="Pilih file cadangan PakaiDulu">
+            </div>
           </div>
           <div class="list-tools">
             <label class="search-box"><span class="visually-hidden">Cari bahan</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Cari bahan…" autocomplete="off"></label>
