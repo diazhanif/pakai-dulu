@@ -11,6 +11,8 @@ const item = (overrides = {}) => ({
 test('tanggal yang tidak valid ditolak dan tanggal kalender valid diterima', () => {
   assert.equal(L.isValidDateKey('2026-02-29'), false);
   assert.equal(L.isValidDateKey('2028-02-29'), true);
+  assert.equal(L.isValidDateKey('0004-02-29'), true);
+  assert.equal(L.daysUntil('0001-01-02', '0001-01-01'), 1);
   assert.equal(L.isValidDateKey('14-10-2026'), false);
 });
 
@@ -30,6 +32,7 @@ test('validasi item memastikan nilai wajib berada dalam rentang yang didukung', 
   assert.equal(L.isValidItem(item()), true);
   assert.equal(L.isValidItem(item({ quantity: 0 })), false);
   assert.equal(L.isValidItem(item({ category: 'Kategori tidak dikenal' })), false);
+  assert.equal(L.isValidItem(item({ consumedAt: 42 })), false);
   assert.equal(L.isValidItem(item({ expiry: '2026-02-30' })), false);
 });
 
@@ -56,4 +59,19 @@ test('CSV mengutip nilai dan menetralkan formula spreadsheet', () => {
   const csv = L.toCsv([item({ name: '=IMPORTXML("x")' })]);
   assert.match(csv, /'=IMPORTXML/);
   assert.match(csv, /Nama bahan/);
+});
+
+test('cadangan JSON dapat diekspor dan dipulihkan tanpa kehilangan data', () => {
+  const original = [item(), item({ id: 'id-2', name: 'Susu', consumed: true, consumedAt: '2026-10-14T12:00:00.000Z' })];
+  const backup = L.createBackup(original, '2026-10-14T12:00:00.000Z');
+  const parsed = L.parseBackup(backup);
+  assert.deepEqual(parsed, original);
+  assert.equal(JSON.parse(backup).format, 'pakai-dulu-backup');
+});
+
+test('pemulihan menolak JSON rusak, format asing, data invalid, dan ID ganda', () => {
+  assert.throws(() => L.parseBackup('{'), /JSON yang valid/);
+  assert.throws(() => L.parseBackup('{"items":[]}'), /bukan cadangan PakaiDulu/);
+  assert.throws(() => L.parseBackup(L.createBackup([item()]).replace('Tomat', '')), /data bahan yang tidak valid/);
+  assert.throws(() => L.createBackup([item(), item()]), /ID ganda/);
 });
