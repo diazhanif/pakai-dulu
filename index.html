@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f1">
+  <meta name="description" content="PakaiDulu membantu mencatat bahan dapur dan mengingatkan mana yang perlu dipakai lebih dulu. Data tersimpan di perangkatmu.">
+  <title>PakaiDulu — pakai yang lebih dulu</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="logic.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#utama" aria-label="PakaiDulu, halaman utama">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none"><path d="M7 9.5h18v15H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M11 9V6.5h10V9M11 15h10M11 19h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M23 22.5 26 26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        <span>Pakai<span class="brand-accent">Dulu</span></span>
+      </a>
+      <div class="privacy-pill"><span class="privacy-dot" aria-hidden="true"></span> Tersimpan di perangkatmu</div>
+    </header>
+
+    <main id="utama">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">DAPUR LEBIH TERATUR</p>
+          <h1 id="page-title">Yang hampir habis masa simpannya,<br><span>pakai dulu.</span></h1>
+          <p class="intro-copy">Catat bahan yang ada di rumah dan lihat mana yang sebaiknya diprioritaskan. Sederhana, tanpa akun, tanpa data keluar dari perangkat.</p>
+        </div>
+        <div class="hero-note"><span class="note-icon" aria-hidden="true">↗</span><p>Rencanakan pemakaian.<br><strong>Kurangi bahan terbuang.</strong></p></div>
+      </section>
+
+      <section class="stats-grid" aria-label="Ringkasan persediaan">
+        <article class="stat-card priority-stat">
+          <div class="stat-label"><span class="stat-icon" aria-hidden="true">!</span> Perlu diprioritaskan</div>
+          <p id="priority-count" class="stat-value">0</p>
+          <p class="stat-caption">Lewat tanggal atau ≤ 3 hari</p>
+        </article>
+        <article class="stat-card stock-stat">
+          <div class="stat-label"><span class="stat-icon" aria-hidden="true">▦</span> Sedang disimpan</div>
+          <p id="stock-count" class="stat-value">0</p>
+          <p class="stat-caption">Bahan aktif di daftar</p>
+        </article>
+        <article class="stat-card done-stat">
+          <div class="stat-label"><span class="stat-icon" aria-hidden="true">✓</span> Sudah dipakai</div>
+          <p id="done-count" class="stat-value">0</p>
+          <p class="stat-caption">Ditandai habis atau terpakai</p>
+        </article>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel add-panel" aria-labelledby="add-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">CATAT BAHAN</p><h2 id="add-title">Tambah ke daftar</h2></div>
+            <span class="heading-spark" aria-hidden="true">✳</span>
+          </div>
+          <form id="item-form" novalidate>
+            <label class="field-label" for="item-name">Nama bahan</label>
+            <input id="item-name" name="name" type="text" maxlength="60" placeholder="Contoh: tahu putih" autocomplete="off" required>
+
+            <div class="form-row">
+              <div class="field-group">
+                <label class="field-label" for="item-category">Kategori</label>
+                <select id="item-category" name="category" required></select>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="item-date">Gunakan sebelum*</label>
+                <input id="item-date" name="expiry" type="date" required>
+              </div>
+            </div>
+
+            <div class="form-row quantity-row">
+              <div class="field-group">
+                <label class="field-label" for="item-quantity">Jumlah</label>
+                <input id="item-quantity" name="quantity" type="number" min="0.01" step="any" inputmode="decimal" placeholder="1" required>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="item-unit">Satuan</label>
+                <select id="item-unit" name="unit" required>
+                  <option value="pcs">pcs</option><option value="bungkus">bungkus</option><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="butir">butir</option><option value="ikat">ikat</option>
+                </select>
+              </div>
+            </div>
+            <p class="field-hint">*Isi sesuai tanggal pada label kemasan. Jika tidak ada, gunakan perkiraanmu.</p>
+            <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> Simpan bahan</button>
+            <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel inventory-panel" aria-labelledby="inventory-title">
+          <div class="inventory-heading">
+            <div><p class="eyebrow">ISI DAPURMU</p><h2 id="inventory-title">Daftar bahan</h2></div>
+            <button id="export-button" class="secondary-button" type="button" title="Unduh semua bahan sebagai file CSV">Ekspor CSV <span aria-hidden="true">↓</span></button>
+          </div>
+          <div class="list-tools">
+            <label class="search-box"><span class="visually-hidden">Cari bahan</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Cari bahan…" autocomplete="off"></label>
+            <div class="filter-tabs" role="group" aria-label="Filter daftar bahan">
+              <button class="filter-button is-active" type="button" data-filter="active" aria-pressed="true">Disimpan</button>
+              <button class="filter-button" type="button" data-filter="priority" aria-pressed="false">Prioritas</button>
+              <button class="filter-button" type="button" data-filter="done" aria-pressed="false">Sudah dipakai</button>
+            </div>
+          </div>
+          <p id="result-count" class="result-count" aria-live="polite"></p>
+          <ul id="items-list" class="items-list" aria-label="Daftar bahan dapur"></ul>
+          <div id="empty-state" class="empty-state">
+            <span class="empty-illustration" aria-hidden="true">⌂</span>
+            <h3>Daftarmu masih kosong</h3>
+            <p>Mulai dengan mencatat satu bahan. Nanti, bahan yang perlu dipakai lebih dulu akan muncul di bagian atas.</p>
+          </div>
+          <div id="no-results" class="empty-state compact-empty" hidden><h3>Tidak ada yang cocok</h3><p>Coba kata kunci atau filter lain.</p></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p class="safety-note"><strong>Catatan penting:</strong> PakaiDulu hanya pengingat tanggal, bukan penentu keamanan makanan. Ikuti petunjuk penyimpanan pada label dan periksa kondisi bahan sebelum digunakan.</p>
+      <p class="footer-small">Data disimpan di penyimpanan browser pada perangkat ini. Ekspor CSV jika ingin membuat cadangan.</p>
+    </footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
